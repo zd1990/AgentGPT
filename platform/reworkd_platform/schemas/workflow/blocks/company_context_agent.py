@@ -5,6 +5,7 @@ from loguru import logger
 
 from reworkd_platform.schemas.workflow.base import Block, BlockIOBase
 from reworkd_platform.settings import settings
+from reworkd_platform.chatbox import CustomLLM
 
 
 class CompanyContextAgentInput(BlockIOBase):
@@ -43,15 +44,18 @@ async def execute_prompt(company: str) -> str:
     Only use the given information and nothing more.
     """
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=1,
-        max_tokens=500,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0,
-    )
+    # response = openai.ChatCompletion.create(
+    #     model="gpt-3.5-turbo",
+    #     messages=[{"role": "user", "content": prompt}],
+    #     temperature=1,
+    #     max_tokens=500,
+    #     top_p=1,
+    #     frequency_penalty=0,
+    #     presence_penalty=0,
+    # )
+
+    chatbot = CustomLLM(model=settings.openai_model, access_token=settings.openai_access_token)
+    response_message_content = chatbot.get_streamed_result_of_chatgpt(prompt)
 
     response_message_content = response["choices"][0]["message"]["content"]
 

@@ -19,6 +19,7 @@ from reworkd_platform.schemas.workflow.base import Block, BlockIOBase
 from reworkd_platform.services.aws.s3 import SimpleStorageService
 from reworkd_platform.settings import settings
 from reworkd_platform.web.api.agent.model_factory import create_model
+from reworkd_platform.chatbox import CustomLLM
 
 
 class SummaryAgentInput(BlockIOBase):
@@ -68,17 +69,20 @@ class SummaryAgent(Block):
         Write a title for the table that is less than 9 words: {table}
         """
 
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=1,
-            max_tokens=500,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-        )
+        # response = openai.ChatCompletion.create(
+        #     model="gpt-3.5-turbo",
+        #     messages=[{"role": "user", "content": prompt}],
+        #     temperature=1,
+        #     max_tokens=500,
+        #     top_p=1,
+        #     frequency_penalty=0,
+        #     presence_penalty=0,
+        # )
 
-        response_message_content = response["choices"][0]["message"]["content"]
+        chatbot = CustomLLM(model=settings.openai_model, access_token=settings.openai_access_token)
+        response_message_content = chatbot.get_streamed_result_of_chatgpt(prompt)
+
+        # response_message_content = response["choices"][0]["message"]["content"]
 
         return response_message_content
 
